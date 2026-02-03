@@ -288,7 +288,7 @@ export default async function ContractDetailPage({
                 <div className="text-4xl font-bold text-red-600">
                   {
                     analysis.clauses.filter(
-                      (c) =>
+                      (c: { riskLevel: string }) =>
                         c.riskLevel === "HIGH" || c.riskLevel === "CRITICAL"
                     ).length
                   }
