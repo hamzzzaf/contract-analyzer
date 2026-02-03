@@ -17,48 +17,40 @@ const isProtectedRoute = createRouteMatcher([
   "/billing(.*)",
 ]);
 
-// Public routes that don't need auth
-const _isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks(.*)",
-]);
+// Add security headers to all responses
+function addSecurityHeaders(response: NextResponse) {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  return response;
+}
 
-export default async function middleware(req: NextRequest) {
-  // Add security headers to all responses
-  const addSecurityHeaders = (response: NextResponse) => {
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "DENY");
-    response.headers.set("X-XSS-Protection", "1; mode=block");
-    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-    return response;
-  };
+// Dev mode middleware - allow all requests
+function devMiddleware(_req: NextRequest) {
+  return addSecurityHeaders(NextResponse.next());
+}
 
-  // If Clerk is not configured, allow all requests (dev mode)
-  if (!isClerkConfigured) {
-    return addSecurityHeaders(NextResponse.next());
+// Production middleware with Clerk auth
+const productionMiddleware = clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
+
+  // If user is not signed in and trying to access protected route
+  if (!userId && isProtectedRoute(req)) {
+    const signInUrl = new URL("/sign-in", req.url);
+    signInUrl.searchParams.set("redirect_url", req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // Use Clerk middleware for authentication
-  return clerkMiddleware(async (auth, req) => {
-    const { userId } = await auth();
+  // If user is signed in and trying to access sign-in/sign-up pages
+  if (userId && (req.nextUrl.pathname.startsWith("/sign-in") || req.nextUrl.pathname.startsWith("/sign-up"))) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
 
-    // If user is not signed in and trying to access protected route
-    if (!userId && isProtectedRoute(req)) {
-      const signInUrl = new URL("/sign-in", req.url);
-      signInUrl.searchParams.set("redirect_url", req.url);
-      return NextResponse.redirect(signInUrl);
-    }
+  return addSecurityHeaders(NextResponse.next());
+});
 
-    // If user is signed in and trying to access sign-in/sign-up pages
-    if (userId && (req.nextUrl.pathname.startsWith("/sign-in") || req.nextUrl.pathname.startsWith("/sign-up"))) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
-    return addSecurityHeaders(NextResponse.next());
-  })(req);
-}
+export default isClerkConfigured ? productionMiddleware : devMiddleware;
 
 export const config = {
   matcher: [

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getDownloadUrl } from "@/services/storage";
 
 // GET /api/contracts - List all contracts for the current user
 export async function GET() {
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
     }
 
     // Generate download URL
-    const fileUrl = await getDownloadPresignedUrl(fileKey);
+    const fileUrl = await getDownloadUrl(fileKey);
 
     // Create contract record
     const contract = await db.contract.create({

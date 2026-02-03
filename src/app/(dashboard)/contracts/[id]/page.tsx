@@ -319,7 +319,7 @@ export default async function ContractDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {analysis.clauses.map((clause) => (
+              {analysis.clauses.map((clause: { id: string; analysisId: string; category: string; text: string; riskLevel: string; explanation: string; recommendation: string | null; position: number; pageNumber: number | null }) => (
                 <div
                   key={clause.id}
                   className="rounded-lg border p-4"
