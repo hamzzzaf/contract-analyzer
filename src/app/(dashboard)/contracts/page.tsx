@@ -142,7 +142,7 @@ export default async function ContractsPage() {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y">
-              {contracts.map((contract) => (
+              {contracts.map((contract: { id: string; fileName: string; fileSize: number; status: string; riskScore: number | null; pageCount: number | null; createdAt: Date }) => (
                 <Link
                   key={contract.id}
                   href={`/contracts/${contract.id}`}

@@ -163,7 +163,7 @@ export default async function LandingPage() {
               "Data Privacy",
               "Force Majeure",
               "And More...",
-            ].map((category) => (
+            ].map((category: string) => (
               <div
                 key={category}
                 className="rounded-lg border bg-white p-4 text-center text-sm font-medium"

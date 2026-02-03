@@ -97,7 +97,7 @@ export default async function BillingPage() {
       <div>
         <h2 className="mb-4 text-xl font-semibold">Available Plans</h2>
         <div className="grid gap-6 md:grid-cols-3">
-          {plans.map((plan) => (
+          {plans.map((plan: { name: string; price: string; period: string; features: string[]; current: boolean }) => (
             <Card
               key={plan.name}
               className={
@@ -120,7 +120,7 @@ export default async function BillingPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature: string) => (
                     <li key={feature} className="flex items-center gap-2 text-sm">
                       <svg
                         className="h-4 w-4 text-green-500"
