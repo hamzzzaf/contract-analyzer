@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String     @id @default(cuid())
+  clerkId           String     @unique
+  email             String     @unique
+  plan              Plan       @default(FREE)
+  stripeCustomerId  String?
+  contractsAnalyzed Int        @default(0)
+  monthlyLimit      Int        @default(3)
+  contracts         Contract[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Contract {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileUrl       String
+  fileKey       String
+  fileSize      Int
+  pageCount     Int?
+  extractedText String?        @db.Text
+  status        ContractStatus @default(PENDING)
+  riskScore     Float?
+  analysis      Analysis?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+model Analysis {
+  id          String   @id @default(cuid())
+  contractId  String   @unique
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  riskScore   Float
+  summary     String   @db.Text
+  riskSummary String   @db.Text
+  clauses     Clause[]
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}
+
+model Clause {
+  id             String         @id @default(cuid())
+  analysisId     String
+  analysis       Analysis       @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  category       ClauseCategory
+  text           String         @db.Text
+  riskLevel      RiskLevel
+  explanation    String         @db.Text
+  recommendation String?        @db.Text
+  position       Int
+  pageNumber     Int?
+
+  @@index([analysisId])
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum ContractStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ClauseCategory {
+  PAYMENT_TERMS
+  LIABILITY
+  INDEMNIFICATION
+  TERMINATION
+  INTELLECTUAL_PROPERTY
+  CONFIDENTIALITY
+  NON_COMPETE
+  AUTO_RENEWAL
+  DISPUTE_RESOLUTION
+  DATA_PRIVACY
+  FORCE_MAJEURE
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
