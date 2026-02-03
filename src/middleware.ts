@@ -59,8 +59,7 @@ const productionMiddleware = clerkMiddleware(async (auth, req) => {
   return addSecurityHeaders(NextResponse.next());
 });
 
-// Temporarily disable Clerk to test if it's causing Railway health check failures
-export default devMiddleware;
+export default isClerkConfigured ? productionMiddleware : devMiddleware;
 
 export const config = {
   matcher: [
