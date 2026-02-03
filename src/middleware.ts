@@ -27,12 +27,21 @@ function addSecurityHeaders(response: NextResponse) {
 }
 
 // Dev mode middleware - allow all requests
-function devMiddleware(_req: NextRequest) {
+function devMiddleware(req: NextRequest) {
+  // Always allow health check
+  if (req.nextUrl.pathname === "/api/health") {
+    return NextResponse.next();
+  }
   return addSecurityHeaders(NextResponse.next());
 }
 
 // Production middleware with Clerk auth
 const productionMiddleware = clerkMiddleware(async (auth, req) => {
+  // Always allow health check
+  if (req.nextUrl.pathname === "/api/health") {
+    return NextResponse.next();
+  }
+
   const { userId } = await auth();
 
   // If user is not signed in and trying to access protected route
