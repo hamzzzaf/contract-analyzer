@@ -35,19 +35,17 @@ export default async function LandingPage() {
             Contract Analyzer
           </Link>
           <nav className="flex items-center gap-4">
-            {userId || devMode ? (
+            <Link href="/contracts/upload">
+              <Button variant="ghost">Try Now</Button>
+            </Link>
+            {userId ? (
               <Link href="/dashboard">
                 <Button>Dashboard</Button>
               </Link>
             ) : (
-              <>
-                <Link href="/sign-in">
-                  <Button variant="ghost">Sign In</Button>
-                </Link>
-                <Link href="/sign-up">
-                  <Button>Get Started</Button>
-                </Link>
-              </>
+              <Link href="/sign-in">
+                <Button>Sign In</Button>
+              </Link>
             )}
           </nav>
         </div>
@@ -64,14 +62,18 @@ export default async function LandingPage() {
           auto-renewal, and more.
         </p>
         <div className="mt-10 flex gap-4">
-          <Link href={userId || devMode ? "/dashboard" : "/sign-up"}>
+          <Link href="/contracts/upload">
             <Button size="lg">
-              {userId || devMode ? "Go to Dashboard" : "Start Free Trial"}
+              Try It Now - Free
             </Button>
           </Link>
-          <Button size="lg" variant="outline">
-            Learn More
-          </Button>
+          {userId && (
+            <Link href="/dashboard">
+              <Button size="lg" variant="outline">
+                Go to Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 

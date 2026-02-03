@@ -11,6 +11,10 @@ const isClerkConfigured =
 const DEV_USER_ID = "dev-user";
 const DEV_USER_EMAIL = "dev@localhost";
 
+// Guest user for anonymous access
+const GUEST_USER_ID = "guest-user";
+const GUEST_USER_EMAIL = "guest@example.com";
+
 /**
  * Get or create the dev user for local development
  */
@@ -25,6 +29,27 @@ async function getOrCreateDevUser() {
         clerkId: DEV_USER_ID,
         email: DEV_USER_EMAIL,
         monthlyLimit: 100, // High limit for dev
+      },
+    });
+  }
+
+  return user;
+}
+
+/**
+ * Get or create a guest user for anonymous access
+ */
+async function getOrCreateGuestUser() {
+  let user = await db.user.findUnique({
+    where: { clerkId: GUEST_USER_ID },
+  });
+
+  if (!user) {
+    user = await db.user.create({
+      data: {
+        clerkId: GUEST_USER_ID,
+        email: GUEST_USER_EMAIL,
+        monthlyLimit: 3, // Limited for guests
       },
     });
   }
@@ -56,8 +81,9 @@ export async function getCurrentUser() {
 export async function requireUser() {
   const user = await getCurrentUser();
 
+  // If no authenticated user, use guest user (allows trying the app)
   if (!user) {
-    throw new Error("Unauthorized");
+    return getOrCreateGuestUser();
   }
 
   return user;

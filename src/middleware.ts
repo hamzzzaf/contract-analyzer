@@ -9,10 +9,8 @@ const isClerkConfigured =
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("placeholder") &&
   !process.env.CLERK_SECRET_KEY.includes("placeholder");
 
-// Routes that require authentication
+// Routes that require authentication (minimal - let users try the app first)
 const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/contracts(.*)",
   "/settings(.*)",
   "/billing(.*)",
 ]);
